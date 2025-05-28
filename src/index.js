@@ -70,12 +70,18 @@ const createToyCard = (toy) => {
   const pTag = document.createElement("p");
   pTag.textContent = `${toy.likes} Likes`;
 
-  const likeButtton = document.createElement("button");
-  likeButtton.id = toy.id
-  likeButtton.className = "like-btn";
-  likeButtton.textContent = "Like ❤️";
+  const likeButton = document.createElement("button");
+  likeButton.id = toy.id;
+  likeButton.className = "like-btn";
+  likeButton.textContent = "Like ❤️";
 
-  card.append(name, img, pTag, likeButtton);
+  likeButton.addEventListener("click", () => {
+    console.log(`Toy ID: ${toy.id}`);
+    patchRequest(toy, pTag);
+  });
+
+  card.append(name, img, pTag, likeButton);
+
   return card;
 };
 // Add a New Toy
@@ -115,29 +121,30 @@ const toyForm = (event) => {
     image: form.image.value,
     likes: 0
   }
-  toyToServer(newToyData);
+  postRequest(newToyData);
 };
 
-const postRequest = (toyObject) => {
+const newToyJson = (newToyData) => {
   return {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json"
     },
-    body: JSON.stringify(toyObject)
+    body: JSON.stringify(newToyData)
   };
 };
 
-const toyToServer = (toyObject) => {
-  fetch("http://localhost:3000/toys", postRequest(toyObject))
+const postRequest = (newToyData) => {
+  fetch("http://localhost:3000/toys", newToyJson(newToyData))
     .then(response => response.json())
-    .then(newToy => {
-      appendToysFunction([newToy]);
+    .then(newToyData => {
+      appendToysFunction([newToyData]);
       form.reset();
     })
     .catch(error => console.error("Andy can't find that toy!:", error));
 };
+
 form.addEventListener("submit", toyForm);
 
 // To get this working, you will need to add an event listener to each toy's "Like" button. When the button is clicked for a toy, your code should:
@@ -157,4 +164,38 @@ form.addEventListener("submit", toyForm);
 
 // body: JSON.stringify({
 //   "likes": newNumberOfLikes
-// })
+//
+
+//Create eventListener inside the createCard function? since we will need one for every card. Make sure it grabs the ID
+//Create function to track like count
+//Create Json Patch Request to update Like Count - function?
+//Create function to send PATCH request
+
+// const calculateNewLikes = (toy) => {
+// debugger
+//   return toy.likes ++;
+// };
+// debugger
+
+const newLikeJson = (updatedLikeCount) => {
+  return {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({likes: updatedLikeCount})
+  };
+};
+
+const patchRequest = (toy, pTag) => {
+  const newLike = toy.like++;
+
+  fetch(`http://localhost:3000/toys/${toy.id}`, newLikeJson(newLike))
+  .then(res => res.json())
+  .then(data => {
+    toy.likes = data.likes;
+    pTag.textContent = `${data.likes} Likes`;
+  })
+  .catch(error => console.error("Andy Doesn't Like This Toy!:", error));
+};
