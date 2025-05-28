@@ -22,7 +22,7 @@ const fetchToys = (url) => {
   fetch(url)
     .then(res => res.json())
     .then(data => appendToysFunction(data))
-    .catch(error => console.log("Andy's Coming!!:", error));
+    .catch(error => console.log("Andy's Coming HIDE !!:", error));
 };
 
 fetchToys(toysUrl);
@@ -49,7 +49,7 @@ fetchToys(toysUrl);
 // ** Create Toy Card - Populate toy info and create card from JSon data - see above for card creation instructions
 
 const appendToysFunction = (toys) => {
-  const toyCollection = document.getElementById("toy-collection");
+const toyCollection = document.getElementById("toy-collection");
   toys.forEach(toy => {
     const createCard = createToyCard(toy);
     toyCollection.appendChild(createCard);
@@ -78,3 +78,83 @@ const createToyCard = (toy) => {
   card.append(name, img, pTag, likeButtton);
   return card;
 };
+// Add a New Toy
+
+// When a user submits the toy form, two things should happen:
+
+//     A POST request should be sent to http://localhost:3000/toys and the new toy added to Andy's Toy Collection.
+//     If the post is successful, the toy should be added to the DOM without reloading the page.
+
+// In order to send a POST request via fetch(), give the fetch() a second argument of an object. This object should specify the method as POST and also provide the appropriate headers and the JSON data for the request. The headers and body should look something like this:
+
+// headers:
+// {
+//   "Content-Type": "application/json",
+//   Accept: "application/json"
+// }
+
+// body: JSON.stringify({
+//   "name": "Jessie",
+//   "image": "https://vignette.wikia.nocookie.net/p__/images/8/88/Jessie_Toy_Story_3.png/revision/latest?cb=20161023024601&path-prefix=protagonist",
+//   "likes": 0
+// })
+
+//Create function to handle Form and Collect data 
+//    create an object with the name and image url from the input options (likes = 0) (new function?, or same function?), send to Json function
+//Create a JSON function to send data from form function to be POST onto the server
+//get(fetch) new toy data on successful response from Json, and reuse appendToysFunction
+
+const form = document.querySelector(".add-toy-form");
+
+const toyForm = (event) => {
+  event.preventDefault();
+  const form = event.target;
+
+  const newToyData = {
+    name: form.name.value,
+    image: form.image.value,
+    likes: 0
+  }
+  toyToServer(newToyData);
+};
+
+const postRequest = (toyObject) => {
+  return {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify(toyObject)
+  };
+};
+
+const toyToServer = (toyObject) => {
+  fetch("http://localhost:3000/toys", postRequest(toyObject))
+    .then(response => response.json())
+    .then(newToy => {
+      appendToysFunction([newToy]);
+      form.reset();
+    })
+    .catch(error => console.error("Andy can't find that toy!:", error));
+};
+form.addEventListener("submit", toyForm);
+
+// To get this working, you will need to add an event listener to each toy's "Like" button. When the button is clicked for a toy, your code should:
+
+//     capture that toy's id,
+//     calculate the new number of likes,
+//     submit the patch request, and
+//     update the toy's card in the DOM based on the Response returned by the fetch request.
+
+// The headers and body should look something like this:
+
+// headers:
+// {
+//   "Content-Type": "application/json",
+//   Accept: "application/json"
+// }
+
+// body: JSON.stringify({
+//   "likes": newNumberOfLikes
+// })
