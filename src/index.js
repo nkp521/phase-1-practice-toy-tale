@@ -27,7 +27,7 @@ const fetchToys = (url) => {
 fetchToys(toysUrl);
 
 const appendToysFunction = (toys) => {
-const toyCollection = document.getElementById("toy-collection");
+  const toyCollection = document.getElementById("toy-collection");
   toys.forEach(toy => {
     const createCard = createToyCard(toy);
     toyCollection.appendChild(createCard);
